@@ -113,7 +113,18 @@ public class ReaperCassandraIT {
       tmpSession.execute(
           "CREATE KEYSPACE reaper_db WITH replication = {" + BasicSteps.buildNetworkTopologyStrategyString(cluster)
           + "}");
+
+      disableMigration(tmpSession);
     }
+  }
+
+  public static void disableMigration(Session session) {
+
+    session.getCluster().getMetadata().getKeyspace("reaper_db").getTables()
+        .stream()
+        .filter(table -> !table.getName().equals("repair_schedule") && !table.getName().equals("repair_unit"))
+        .forEach(tbl -> session.executeAsync(
+            "ALTER TABLE " + tbl.getName() + " WITH compression = { 'enabled' : false }"));
   }
 
   @AfterClass
