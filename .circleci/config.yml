@@ -93,10 +93,17 @@ aliases:
                 sed -i 's/_timeout_in_ms:.*/_timeout_in_ms: 60000/' ~/.ccm/test/node2/conf/cassandra.yaml
                 sed -i 's/_timeout_in_ms:.*/_timeout_in_ms: 60000/' ~/.ccm/test/node3/conf/cassandra.yaml
                 sed -i 's/_timeout_in_ms:.*/_timeout_in_ms: 60000/' ~/.ccm/test/node4/conf/cassandra.yaml
-                sed -i 's/start_rpc: true/start_rpc: false/' ~/.ccm/test/node1/conf/cassandra.yaml
-                sed -i 's/start_rpc: true/start_rpc: false/' ~/.ccm/test/node2/conf/cassandra.yaml
-                sed -i 's/start_rpc: true/start_rpc: false/' ~/.ccm/test/node3/conf/cassandra.yaml
-                sed -i 's/start_rpc: true/start_rpc: false/' ~/.ccm/test/node4/conf/cassandra.yaml
+                if [ echo $CASSANDRA_VERSION | grep -q "git:trunk" ] ; then
+                  sed -i 's/start_rpc: true//' ~/.ccm/test/node1/conf/cassandra.yaml
+                  sed -i 's/start_rpc: true//' ~/.ccm/test/node2/conf/cassandra.yaml
+                  sed -i 's/start_rpc: true//' ~/.ccm/test/node3/conf/cassandra.yaml
+                  sed -i 's/start_rpc: true//' ~/.ccm/test/node4/conf/cassandra.yaml
+                else
+                  sed -i 's/start_rpc: true/start_rpc: false/' ~/.ccm/test/node1/conf/cassandra.yaml
+                  sed -i 's/start_rpc: true/start_rpc: false/' ~/.ccm/test/node2/conf/cassandra.yaml
+                  sed -i 's/start_rpc: true/start_rpc: false/' ~/.ccm/test/node3/conf/cassandra.yaml
+                  sed -i 's/start_rpc: true/start_rpc: false/' ~/.ccm/test/node4/conf/cassandra.yaml
+                fi
                 sed -i 's/cross_node_timeout: false/cross_node_timeout: true/' ~/.ccm/test/node1/conf/cassandra.yaml
                 sed -i 's/cross_node_timeout: false/cross_node_timeout: true/' ~/.ccm/test/node2/conf/cassandra.yaml
                 sed -i 's/cross_node_timeout: false/cross_node_timeout: true/' ~/.ccm/test/node3/conf/cassandra.yaml
