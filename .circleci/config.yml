@@ -98,6 +98,10 @@ aliases:
                   sed -i 's/start_rpc: true//' ~/.ccm/test/node2/conf/cassandra.yaml
                   sed -i 's/start_rpc: true//' ~/.ccm/test/node3/conf/cassandra.yaml
                   sed -i 's/start_rpc: true//' ~/.ccm/test/node4/conf/cassandra.yaml
+                  echo '-Dcassandra.max_local_pause_in_ms=15000' >> ~/.ccm/test/node1/conf/jvm-server.options
+                  echo '-Dcassandra.max_local_pause_in_ms=15000' >> ~/.ccm/test/node2/conf/jvm-server.options
+                  echo '-Dcassandra.max_local_pause_in_ms=15000' >> ~/.ccm/test/node3/conf/jvm-server.options
+                  echo '-Dcassandra.max_local_pause_in_ms=15000' >> ~/.ccm/test/node4/conf/jvm-server.options
                 else
                   sed -i 's/start_rpc: true/start_rpc: false/' ~/.ccm/test/node1/conf/cassandra.yaml
                   sed -i 's/start_rpc: true/start_rpc: false/' ~/.ccm/test/node2/conf/cassandra.yaml
