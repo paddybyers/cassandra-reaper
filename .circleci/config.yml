@@ -69,7 +69,7 @@ aliases:
                 echo "cassandra     readwrite" >> /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.access
                 cat /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.access
                 ccm create test -v $CASSANDRA_VERSION
-                ccm populate --vnodes -n 4
+                ccm populate --vnodes -n 4:0
                 sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node1/conf/cassandra-env.sh
                 sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node2/conf/cassandra-env.sh
                 #if [ echo $JOB_COMMAND | grep -q "-Pskip-tests-needing-all-nodes-reachable" ] ; then
