@@ -143,9 +143,16 @@ aliases:
                 ccm start -v
                 ccm status
                 ccm checklogerror
-                nohup bash -c "(while [ true ] ; do sleep 1 ; ccm start ; done) &"
+                #nohup bash -c "(while [ true ] ; do sleep 1 ; ccm start ; done) &"
                 mvn install -B -DskipTests
                 sh -c '$JOB_COMMAND'
+
+
+        - run:
+            name: Log errors
+            command: |
+                ccm checklogerror
+                cat target/rat.txt
 
         - store_test_results:
             path: src/server/target/surefire-reports
@@ -176,7 +183,7 @@ jobs:
               - ~/.ccm/repository
             key: v1-dependencies-{{ checksum "pom.xml" }}
         - run:
-            command: MAVEN_OPTS="-Xmx1g" mvn -B clean install
+            command: MAVEN_OPTS="-Xmx1g" mvn -B install
     c_2-1_memory:
       environment:
         CASSANDRA_VERSION: 2.1.20
