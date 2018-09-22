@@ -69,18 +69,20 @@ aliases:
                 echo "cassandra     readwrite" >> /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.access
                 cat /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.access
                 ccm create test -v $CASSANDRA_VERSION
-                ccm populate --vnodes -n 2:0
+                ccm populate --vnodes -n 1:1
                 sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node1/conf/cassandra-env.sh
-                sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node2/conf/cassandra-env.sh
-                #if [ echo $JOB_COMMAND | grep -q "-Pskip-tests-needing-all-nodes-reachable" ] ; then
+                #sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node2/conf/cassandra-env.sh
+                if [ echo $JOB_COMMAND | grep -q "-Pskip-tests-needing-all-nodes-reachable" ] ; then
                   # scenarios that are not tagged with @all_nodes_reachable can be tested against an unreachable DC2
+                  sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.blank.password/' ~/.ccm/test/node2/conf/cassandra-env.sh
                   #sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.blank.password/' ~/.ccm/test/node3/conf/cassandra-env.sh
                   #sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.blank.password/' ~/.ccm/test/node4/conf/cassandra-env.sh
-                #else
+                else
                   # @all_nodes_reachable scenarios need all datacenters+nodes reachable
+                  sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node2/conf/cassandra-env.sh
                   #sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node3/conf/cassandra-env.sh
                   #sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node4/conf/cassandra-env.sh
-                #fi
+                fi
                 sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="176m"/' ~/.ccm/test/node1/conf/cassandra-env.sh
                 sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="176m"/' ~/.ccm/test/node2/conf/cassandra-env.sh
                 #sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="176m"/' ~/.ccm/test/node3/conf/cassandra-env.sh
