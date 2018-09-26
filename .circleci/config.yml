@@ -69,90 +69,51 @@ aliases:
                 echo "cassandra     readwrite" >> /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.access
                 cat /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.access
                 ccm create test -v $CASSANDRA_VERSION
-                ccm populate --vnodes -n 1:1
-                sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node1/conf/cassandra-env.sh
-                #sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node2/conf/cassandra-env.sh
-                if [ echo $JOB_COMMAND | grep -q "-Pskip-tests-needing-all-nodes-reachable" ] ; then
-                  # scenarios that are not tagged with @all_nodes_reachable can be tested against an unreachable DC2
-                  sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.blank.password/' ~/.ccm/test/node2/conf/cassandra-env.sh
-                  #sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.blank.password/' ~/.ccm/test/node3/conf/cassandra-env.sh
-                  #sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.blank.password/' ~/.ccm/test/node4/conf/cassandra-env.sh
-                else
-                  # @all_nodes_reachable scenarios need all datacenters+nodes reachable
-                  sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node2/conf/cassandra-env.sh
-                  #sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node3/conf/cassandra-env.sh
-                  #sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node4/conf/cassandra-env.sh
-                fi
-                sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="176m"/' ~/.ccm/test/node1/conf/cassandra-env.sh
-                sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="176m"/' ~/.ccm/test/node2/conf/cassandra-env.sh
-                #sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="176m"/' ~/.ccm/test/node3/conf/cassandra-env.sh
-                #sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="176m"/' ~/.ccm/test/node4/conf/cassandra-env.sh
-                sed -i 's/#HEAP_NEWSIZE="800M"/HEAP_NEWSIZE="144M"/' ~/.ccm/test/node1/conf/cassandra-env.sh
-                sed -i 's/#HEAP_NEWSIZE="800M"/HEAP_NEWSIZE="144M"/' ~/.ccm/test/node2/conf/cassandra-env.sh
-                #sed -i 's/#HEAP_NEWSIZE="800M"/HEAP_NEWSIZE="144M"/' ~/.ccm/test/node3/conf/cassandra-env.sh
-                #sed -i 's/#HEAP_NEWSIZE="800M"/HEAP_NEWSIZE="144M"/' ~/.ccm/test/node4/conf/cassandra-env.sh
-                sed -i 's/_timeout_in_ms:.*/_timeout_in_ms: 60000/' ~/.ccm/test/node1/conf/cassandra.yaml
-                sed -i 's/_timeout_in_ms:.*/_timeout_in_ms: 60000/' ~/.ccm/test/node2/conf/cassandra.yaml
-                #sed -i 's/_timeout_in_ms:.*/_timeout_in_ms: 60000/' ~/.ccm/test/node3/conf/cassandra.yaml
-                #sed -i 's/_timeout_in_ms:.*/_timeout_in_ms: 60000/' ~/.ccm/test/node4/conf/cassandra.yaml
                 if [ echo $CASSANDRA_VERSION | grep -q "git:trunk" ] ; then
-                  sed -i 's/start_rpc: true//' ~/.ccm/test/node1/conf/cassandra.yaml
-                  sed -i 's/start_rpc: true//' ~/.ccm/test/node2/conf/cassandra.yaml
-                  #sed -i 's/start_rpc: true//' ~/.ccm/test/node3/conf/cassandra.yaml
-                  #sed -i 's/start_rpc: true//' ~/.ccm/test/node4/conf/cassandra.yaml
-                  echo '-Dcassandra.max_local_pause_in_ms=15000' >> ~/.ccm/test/node1/conf/jvm-server.options
-                  echo '-Dcassandra.max_local_pause_in_ms=15000' >> ~/.ccm/test/node2/conf/jvm-server.options
-                  #echo '-Dcassandra.max_local_pause_in_ms=15000' >> ~/.ccm/test/node3/conf/jvm-server.options
-                  #echo '-Dcassandra.max_local_pause_in_ms=15000' >> ~/.ccm/test/node4/conf/jvm-server.options
+                  # Cassandra-4.0 appears to be much more demanding on off-heap memory, and on CircleCI we have success running only two nodes
+                  MIN_NODES=1
+                  MAX_NODES=2
                 else
-                  sed -i 's/start_rpc: true/start_rpc: false/' ~/.ccm/test/node1/conf/cassandra.yaml
-                  sed -i 's/start_rpc: true/start_rpc: false/' ~/.ccm/test/node2/conf/cassandra.yaml
-                  #sed -i 's/start_rpc: true/start_rpc: false/' ~/.ccm/test/node3/conf/cassandra.yaml
-                  #sed -i 's/start_rpc: true/start_rpc: false/' ~/.ccm/test/node4/conf/cassandra.yaml
+                  MIN_NODES=2
+                  MAX_NODES=4
                 fi
-                sed -i 's/cross_node_timeout: false/cross_node_timeout: true/' ~/.ccm/test/node1/conf/cassandra.yaml
-                sed -i 's/cross_node_timeout: false/cross_node_timeout: true/' ~/.ccm/test/node2/conf/cassandra.yaml
-                #sed -i 's/cross_node_timeout: false/cross_node_timeout: true/' ~/.ccm/test/node3/conf/cassandra.yaml
-                #sed -i 's/cross_node_timeout: false/cross_node_timeout: true/' ~/.ccm/test/node4/conf/cassandra.yaml
-                sed -i 's/concurrent_reads: 32/concurrent_reads: 4/' ~/.ccm/test/node1/conf/cassandra.yaml
-                sed -i 's/concurrent_reads: 32/concurrent_reads: 4/' ~/.ccm/test/node2/conf/cassandra.yaml
-                #sed -i 's/concurrent_reads: 32/concurrent_reads: 4/' ~/.ccm/test/node3/conf/cassandra.yaml
-                #sed -i 's/concurrent_reads: 32/concurrent_reads: 4/' ~/.ccm/test/node4/conf/cassandra.yaml
-                sed -i 's/concurrent_writes: 32/concurrent_writes: 4/' ~/.ccm/test/node1/conf/cassandra.yaml
-                sed -i 's/concurrent_writes: 32/concurrent_writes: 4/' ~/.ccm/test/node2/conf/cassandra.yaml
-                #sed -i 's/concurrent_writes: 32/concurrent_writes: 4/' ~/.ccm/test/node3/conf/cassandra.yaml
-                #sed -i 's/concurrent_writes: 32/concurrent_writes: 4/' ~/.ccm/test/node4/conf/cassandra.yaml
-                sed -i 's/concurrent_counter_writes: 32/concurrent_counter_writes: 4/' ~/.ccm/test/node1/conf/cassandra.yaml
-                sed -i 's/concurrent_counter_writes: 32/concurrent_counter_writes: 4/' ~/.ccm/test/node2/conf/cassandra.yaml
-                #sed -i 's/concurrent_counter_writes: 32/concurrent_counter_writes: 4/' ~/.ccm/test/node3/conf/cassandra.yaml
-                #sed -i 's/concurrent_counter_writes: 32/concurrent_counter_writes: 4/' ~/.ccm/test/node4/conf/cassandra.yaml
-                sed -i 's/num_tokens: 256/num_tokens: 4/' ~/.ccm/test/node1/conf/cassandra.yaml
-                sed -i 's/num_tokens: 256/num_tokens: 4/' ~/.ccm/test/node2/conf/cassandra.yaml
-                #sed -i 's/num_tokens: 256/num_tokens: 4/' ~/.ccm/test/node3/conf/cassandra.yaml
-                #sed -i 's/num_tokens: 256/num_tokens: 4/' ~/.ccm/test/node4/conf/cassandra.yaml
-                sed -i 's/auto_snapshot: true/auto_snapshot: false/' ~/.ccm/test/node1/conf/cassandra.yaml
-                sed -i 's/auto_snapshot: true/auto_snapshot: false/' ~/.ccm/test/node2/conf/cassandra.yaml
-                #sed -i 's/auto_snapshot: true/auto_snapshot: false/' ~/.ccm/test/node3/conf/cassandra.yaml
-                #sed -i 's/auto_snapshot: true/auto_snapshot: false/' ~/.ccm/test/node4/conf/cassandra.yaml
-                sed -i 's/enable_materialized_views: true/enable_materialized_views: false/' ~/.ccm/test/node1/conf/cassandra.yaml
-                sed -i 's/enable_materialized_views: true/enable_materialized_views: false/' ~/.ccm/test/node2/conf/cassandra.yaml
-                #sed -i 's/enable_materialized_views: true/enable_materialized_views: false/' ~/.ccm/test/node3/conf/cassandra.yaml
-                #sed -i 's/enable_materialized_views: true/enable_materialized_views: false/' ~/.ccm/test/node4/conf/cassandra.yaml
-                sed -i 's/internode_compression: dc/internode_compression: none/' ~/.ccm/test/node1/conf/cassandra.yaml
-                sed -i 's/internode_compression: dc/internode_compression: none/' ~/.ccm/test/node2/conf/cassandra.yaml
-                #sed -i 's/internode_compression: dc/internode_compression: none/' ~/.ccm/test/node3/conf/cassandra.yaml
-                #sed -i 's/internode_compression: dc/internode_compression: none/' ~/.ccm/test/node4/conf/cassandra.yaml
-                echo 'phi_convict_threshold: 16' >> ~/.ccm/test/node1/conf/cassandra.yaml
-                echo 'phi_convict_threshold: 16' >> ~/.ccm/test/node2/conf/cassandra.yaml
-                #echo 'phi_convict_threshold: 16' >> ~/.ccm/test/node3/conf/cassandra.yaml
-                #echo 'phi_convict_threshold: 16' >> ~/.ccm/test/node4/conf/cassandra.yaml
+                ccm populate --vnodes -n $MIN_NODES:$MIN_NODES
+                for i in `seq 1 $MAX_NODES` ; do
+                  if [ "$i" -le "$MIN_NODES" ] ; then
+                    sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node$i/conf/cassandra-env.sh
+                  else
+                    if [ echo $JOB_COMMAND | grep -q "-Pskip-tests-needing-all-nodes-reachable" ] ; then
+                      # scenarios that are not tagged with @all_nodes_reachable can be tested against an unreachable DC2
+                      sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.blank.password/' ~/.ccm/test/node$i/conf/cassandra-env.sh
+                    else
+                      # @all_nodes_reachable scenarios need all datacenters+nodes reachable
+                      sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node$i/conf/cassandra-env.sh
+                    fi
+                  fi
+                  sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="176m"/' ~/.ccm/test/node$i/conf/cassandra-env.sh
+                  sed -i 's/#HEAP_NEWSIZE="800M"/HEAP_NEWSIZE="144M"/' ~/.ccm/test/node$i/conf/cassandra-env.sh
+                  sed -i 's/_timeout_in_ms:.*/_timeout_in_ms: 60000/' ~/.ccm/test/node$i/conf/cassandra.yaml
+                  sed -i 's/cross_node_timeout: false/cross_node_timeout: true/' ~/.ccm/test/node$i/conf/cassandra.yaml
+                  sed -i 's/concurrent_reads: 32/concurrent_reads: 4/' ~/.ccm/test/node$i/conf/cassandra.yaml
+                  sed -i 's/concurrent_writes: 32/concurrent_writes: 4/' ~/.ccm/test/node$i/conf/cassandra.yaml
+                  sed -i 's/concurrent_counter_writes: 32/concurrent_counter_writes: 4/' ~/.ccm/test/node$i/conf/cassandra.yaml
+                  sed -i 's/num_tokens: 256/num_tokens: 4/' ~/.ccm/test/node$i/conf/cassandra.yaml
+                  sed -i 's/auto_snapshot: true/auto_snapshot: false/' ~/.ccm/test/node$i/conf/cassandra.yaml
+                  sed -i 's/enable_materialized_views: true/enable_materialized_views: false/' ~/.ccm/test/node$i/conf/cassandra.yaml
+                  sed -i 's/internode_compression: dc/internode_compression: none/' ~/.ccm/test/node$i/conf/cassandra.yaml
+                  echo 'phi_convict_threshold: 16' >> ~/.ccm/test/node$i/conf/cassandra.yaml
+                  if [ echo $CASSANDRA_VERSION | grep -q "git:trunk" ] ; then
+                    sed -i 's/start_rpc: true//' ~/.ccm/test/node$i/conf/cassandra.yaml
+                    echo '-Dcassandra.max_local_pause_in_ms=15000' >> ~/.ccm/test/node$i/conf/jvm-server.options
+                  else
+                    sed -i 's/start_rpc: true/start_rpc: false/' ~/.ccm/test/node$i/conf/cassandra.yaml
+                  fi
+                done
                 ccm start -v
                 ccm status
                 ccm checklogerror
-                #nohup bash -c "(while [ true ] ; do sleep 1 ; ccm start ; done) &"
                 mvn install -B -DskipTests
                 sh -c '$JOB_COMMAND'
-
 
         - run:
             name: Log errors
