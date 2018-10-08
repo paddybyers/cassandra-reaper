@@ -59,6 +59,7 @@ aliases:
         - run:
             name: Start ccm and run tests
             command: |
+                set -x
                 export LOCAL_JMX=no
                 mkdir -p ~/.local
                 cp src/ci/jmxremote.password ~/.local/jmxremote.password
@@ -69,7 +70,7 @@ aliases:
                 echo "cassandra     readwrite" >> /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.access
                 cat /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management/jmxremote.access
                 ccm create test -v $CASSANDRA_VERSION
-                if [ echo $CASSANDRA_VERSION | grep -q "git:trunk" ] ; then
+                if  echo "$CASSANDRA_VERSION" | grep -q "trunk"  ; then
                   # Cassandra-4.0 appears to be much more demanding on off-heap memory, and on CircleCI we have success running only two nodes
                   MIN_NODES=1
                   MAX_NODES=2
@@ -82,7 +83,7 @@ aliases:
                   if [ "$i" -le "$MIN_NODES" ] ; then
                     sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node$i/conf/cassandra-env.sh
                   else
-                    if [ echo $JOB_COMMAND | grep -q "-Pskip-tests-needing-all-nodes-reachable" ] ; then
+                    if  echo "$JOB_COMMAND" | grep -q "-Pskip-tests-needing-all-nodes-reachable"  ; then
                       # scenarios that are not tagged with @all_nodes_reachable can be tested against an unreachable DC2
                       sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.blank.password/' ~/.ccm/test/node$i/conf/cassandra-env.sh
                     else
@@ -102,7 +103,7 @@ aliases:
                   sed -i 's/enable_materialized_views: true/enable_materialized_views: false/' ~/.ccm/test/node$i/conf/cassandra.yaml
                   sed -i 's/internode_compression: dc/internode_compression: none/' ~/.ccm/test/node$i/conf/cassandra.yaml
                   echo 'phi_convict_threshold: 16' >> ~/.ccm/test/node$i/conf/cassandra.yaml
-                  if [ echo $CASSANDRA_VERSION | grep -q "git:trunk" ] ; then
+                  if  echo "$CASSANDRA_VERSION" | grep -q "trunk"  ; then
                     sed -i 's/start_rpc: true//' ~/.ccm/test/node$i/conf/cassandra.yaml
                     echo '-Dcassandra.max_local_pause_in_ms=15000' >> ~/.ccm/test/node$i/conf/jvm-server.options
                   else
