@@ -83,7 +83,7 @@ aliases:
                   if [ "$i" -le "$MIN_NODES" ] ; then
                     sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.password/' ~/.ccm/test/node$i/conf/cassandra-env.sh
                   else
-                    if  echo "$JOB_COMMAND" | grep -q "-Pskip-tests-needing-all-nodes-reachable"  ; then
+                    if  echo "$JOB_COMMAND" | grep -q "Pskip-tests-needing-all-nodes-reachable"  ; then
                       # scenarios that are not tagged with @all_nodes_reachable can be tested against an unreachable DC2
                       sed -i 's/etc\/cassandra\/jmxremote.password/home\/circleci\/.local\/jmxremote.blank.password/' ~/.ccm/test/node$i/conf/cassandra-env.sh
                     else
