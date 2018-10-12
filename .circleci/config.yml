@@ -137,8 +137,6 @@ jobs:
         - restore_cache:
             keys:
             - v1-dependencies-{{ checksum "pom.xml" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
         - run: mvn -B dependency:go-offline
         - save_cache:
             paths:
@@ -330,7 +328,7 @@ jobs:
     c_4-0_flapping-reapers:
       environment:
         CASSANDRA_VERSION: git:trunk
-        JOB_COMMAND: mvn -B surefire:test -DsurefireArgLine="-Xmx384m" -Dtest=ReaperCassandraIT -Pskip-tests-needing-all-nodes-reachable -Dgrim.reaper.min=2 -Dgrim.reaper.max=4
+        JOB_COMMAND: mvn -B surefire:test -DsurefireArgLine="-Xmx406m" -Dtest=ReaperCassandraIT -Pskip-tests-needing-all-nodes-reachable -Dgrim.reaper.min=2 -Dgrim.reaper.max=4
       <<: *default_job
     c_4-0_one-reaper_incremental:
       environment:
@@ -345,7 +343,7 @@ jobs:
     c_4-0_flapping-reapers_incremental:
       environment:
         CASSANDRA_VERSION: git:trunk
-        JOB_COMMAND: mvn -B surefire:test -DsurefireArgLine="-Xmx384m" -Dtest=ReaperCassandraIT -Ponly-tests-needing-all-nodes-reachable -Dgrim.reaper.min=2 -Dgrim.reaper.max=4
+        JOB_COMMAND: mvn -B surefire:test -DsurefireArgLine="-Xmx406m" -Dtest=ReaperCassandraIT -Ponly-tests-needing-all-nodes-reachable -Dgrim.reaper.min=2 -Dgrim.reaper.max=4
       <<: *default_job
 workflows:
   version: 2
