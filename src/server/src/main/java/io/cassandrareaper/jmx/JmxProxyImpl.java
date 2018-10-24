@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
@@ -284,6 +285,20 @@ final class JmxProxyImpl implements JmxProxy {
     Preconditions.checkNotNull(ssProxy, "Looks like the proxy is not connected");
 
     return Lists.transform(Lists.newArrayList(ssProxy.getTokenToEndpointMap().keySet()), s -> new BigInteger(s));
+  }
+
+  @Override
+  public Map<String, List<String>> getTokensByNode() {
+    Preconditions.checkNotNull(ssProxy, "Looks like the proxy is not connected");
+
+    Map<String, String> tokenToEndpointMap = ssProxy.getTokenToEndpointMap();
+    return tokenToEndpointMap
+        .entrySet()
+        .stream()
+        .collect(
+            Collectors.groupingBy(
+                Entry::getValue, Collectors.mapping(Entry::getKey, Collectors.toList())));
+
   }
 
   @Override

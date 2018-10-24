@@ -128,4 +128,6 @@ public interface JmxProxy extends NotificationListener {
 
   void removeRepairStatusHandler(int repairNo);
 
+  Map<String, List<String>> getTokensByNode();
+
 }
